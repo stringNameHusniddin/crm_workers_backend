@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, Union
+from typing import Optional, Union, List
 from datetime import date
 
 class WorksSchema(BaseModel):
@@ -91,11 +91,11 @@ class showNotifications(BaseNotifications):
 
 class ShowUser(UserSchema):
     id:int
-    works : list[ShowWorksUser]=[]
-    created_works : list[ShowWorksUser]=[]
-    notes : list[ShowNoteUser]=[]
-    notifications : list[showNotifications]=[]
-    created_notifications : list[showNotifications]=[]
+    works : List[ShowWorksUser]=[]
+    created_works : List[ShowWorksUser]=[]
+    notes : List[ShowNoteUser]=[]
+    notifications : List[showNotifications]=[]
+    created_notifications : List[showNotifications]=[]
 
     class Config:
         orm_mode = True
