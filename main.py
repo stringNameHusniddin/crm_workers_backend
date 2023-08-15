@@ -10,7 +10,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 origins = [
     "https://crm-workers.vercel.app",
-    "http://localhost:3000/",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
