@@ -72,7 +72,7 @@ def getUser(session: Session = Depends(get_db), current_user: schemas.UserSchema
     return users
 
 @app.post("/user", tags=["User"])
-def CreateUser(user: schemas.UserSchema, session: Session = Depends(get_db)):
+def CreateUser(user: schemas.UserSchema, session: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     user = models.UserModel(role=user.role, username=user.username, password=hashing.Hash.bcrypt(user.password), first_name=user.first_name, last_name=user.last_name, join_data=user.join_data, status=user.status, age=user.age, email=user.email, boss_id=user.boss_id)
     session.add(user)
     session.commit()
@@ -103,7 +103,7 @@ def deleteUser(id: int, session: Session = Depends(get_db), current_user: schema
 def login(request: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_db)):
     user = session.query(models.UserModel).filter(models.UserModel.username == request.username).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Invalid Credentials")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Invalid username")
     if not hashing.Hash.verify(user.password, request.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail=f"Incorrect password")
@@ -141,3 +141,38 @@ def delete_user(id:int, db:Session=Depends(get_db), current_user: schemas.UserSc
     note.delete()
     db.commit()
     return "done"
+
+# Notifications
+
+@app.post("/notifications", tags=["notifications"])
+def create_notifications(req:schemas.createNotifications, db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
+    new_notification = models.Notification(text = req.text, owner_id = req.owner_id, to_id = req.to_id)
+    db.add(new_notification)
+    db.commit()
+    db.refresh(new_notification)
+
+    return new_notification
+
+@app.get("/notifications", tags=["notifications"])
+def list_notifications(db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
+    notifications = db.query(models.Notification).all()
+
+    return notifications
+
+@app.put("/notifications/{id}", tags=["notifications"])
+def update_notifications(id:int, req:schemas.createNotifications, db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
+    notification =db.query(models.Notification).filter(models.Notification.id == id)
+    if not notification.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    notification.update(dict(req))
+    db.commit()
+    return notification
+
+@app.delete("/notifications/{id}", tags=["notifications"])
+def delete_notifications(id:int, db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
+    notification =db.query(models.Notification).filter(models.Notification.id == id)
+    if not notification.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    notification.delete()
+    db.commit()
+    return notification

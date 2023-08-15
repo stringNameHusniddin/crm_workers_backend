@@ -72,14 +72,30 @@ class ShowNote(BaseModel):
 class ShowNoteUser(BaseModel):
     text : str
 
+class Sub(BaseModel):
+    username : str
+
+class BaseNotifications(BaseModel):
+    text : str
+
+class createNotifications(BaseNotifications):
+    owner_id : int
+    to_id : int
+
+class showNotifications(BaseNotifications):
+    to : UserSchema
+    owner : UserSchema
+
+    class Config:
+        orm_mode = True
+
 class ShowUser(UserSchema):
     id:int
     works : list[ShowWorksUser]=[]
     created_works : list[ShowWorksUser]=[]
     notes : list[ShowNoteUser]=[]
+    notifications : list[showNotifications]=[]
+    created_notifications : list[showNotifications]=[]
 
     class Config:
         orm_mode = True
-
-class Sub(BaseModel):
-    username : str
