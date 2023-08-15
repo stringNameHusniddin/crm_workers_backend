@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import models, schemas, hashing, tokin, oauth2
 from database import get_db, engine
 from fastapi.middleware.cors import CORSMiddleware
-
+from typing import List
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -22,7 +22,7 @@ app.add_middleware(
 
 # WORK CRUD 
 
-@app.get('/work', tags=["Work"], response_model=list[schemas.ShowWorks])
+@app.get('/work', tags=["Work"], response_model=List[schemas.ShowWorks])
 def getWork(session: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     work = session.query(models.WorksModel).all()
     return work
@@ -64,7 +64,7 @@ def detail_user(username:str, db:Session=Depends(get_db), current_user: schemas.
     
     return user
 
-@app.get("/user", tags=["User"], response_model=list[schemas.ShowUser])
+@app.get("/user", tags=["User"], response_model=List[schemas.ShowUser])
 def getUser(session: Session = Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     users = session.query(models.UserModel).all()
     return users
@@ -111,7 +111,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), session: Session = Dep
 
 # NOTES 
 
-@app.get("/notes", tags=["notes"], response_model=list[schemas.ShowNote])
+@app.get("/notes", tags=["notes"], response_model=List[schemas.ShowNote])
 def list_notes(db:Session=Depends(get_db), current_user: schemas.UserSchema = Depends(oauth2.get_current_user)):
     notes = db.query(models.NoteModel).all()
     return notes
