@@ -19,7 +19,7 @@ class UserSchema(BaseModel):
     join_data : date
     status : str
     age : int
-    email : EmailStr | None = None
+    email : Union[EmailStr, None] = None
     boss_id:int
 
 class Token(BaseModel):
